@@ -82,7 +82,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is invoking writing-plans.** Do NOT invoke any implementation or execution skill from brainstorming. The ONLY skill you invoke after brainstorming is writing-plans.
 
 ## The Process
 
@@ -132,7 +132,6 @@ digraph brainstorming {
 
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
-- Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git when inside a git repository. If the workspace is not a git repository, say commit was skipped and continue to the user review gate.
 
 **Spec Self-Review:**
