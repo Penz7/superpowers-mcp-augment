@@ -32,6 +32,12 @@ The server watches a directory for HTML files and serves the newest one to the b
 
 ## Starting a Session
 
+**Resolve script path first:** `scripts/start-server.sh` is relative to this `brainstorming` skill directory, not the user's project root. In Codex, use the installed skill path shown in the skill list, for example:
+
+```bash
+/Users/penz/.codex/plugins/cache/superpowers-mcp-augment/superpowers-mcp-augment/5.1.0/skills/brainstorming/scripts/start-server.sh --project-dir /path/to/project
+```
+
 ```bash
 # Start server with persistence (mockups saved to project)
 scripts/start-server.sh --project-dir /path/to/project
@@ -66,9 +72,8 @@ When calling this via the Bash tool, set `run_in_background: true`. Then read `$
 
 **Codex:**
 ```bash
-# Codex reaps background processes. The script auto-detects CODEX_CI and
-# switches to foreground mode. Run it normally — no extra flags needed.
-scripts/start-server.sh --project-dir /path/to/project
+# Use the absolute path to this skill's script from the installed plugin cache.
+/path/to/brainstorming/skill/scripts/start-server.sh --project-dir /path/to/project
 ```
 
 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:

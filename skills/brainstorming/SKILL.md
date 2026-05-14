@@ -21,6 +21,12 @@ When the user says the design is correct, agrees with the recommended approach, 
 Send each visual companion offer, clarifying question, approach choice, and approval request exactly once per turn. Do not repeat the same text after a separator, status update, or tool result. If you suspect the interface echoed your previous message, continue from the user's newest response instead of restating the prompt.
 </NO-DUPLICATE-PROMPTS>
 
+<VISUAL-DESIGN-REVIEW-GATE>
+If the user accepted the visual companion and the work involves frontend UI, web pages, product screens, dashboards, layout, visual style, or other visual design, you MUST use the browser companion before asking for design approval. Start the companion server, render at least one visual review screen on localhost, give the URL, and ask the user to review it there. A text-only design summary is not enough for visual work after the user has accepted the URL companion.
+
+Visual companion artifacts under `.superpowers/brainstorm/` are allowed during brainstorming and do not count as implementation files. Product files such as `index.html`, `styles.css`, `main.js`, app source files, package manifests, or tests are still forbidden until the spec and implementation plan gates are complete.
+</VISUAL-DESIGN-REVIEW-GATE>
+
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
@@ -33,7 +39,7 @@ You MUST create a task for each of these items and complete them in order:
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
+5. **Present design** — in sections scaled to their complexity; for visual/frontend work with accepted companion, present a localhost visual review before asking for approval
 6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit if the workspace is a git repository
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
@@ -49,6 +55,8 @@ digraph brainstorming {
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
+    "Accepted visual companion\nand visual work?" [shape=diamond];
+    "Render localhost\nvisual review" [shape=box];
     "User approves design?" [shape=diamond];
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
@@ -61,7 +69,10 @@ digraph brainstorming {
     "Offer Visual Companion\n(own message, no other content)" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
+    "Present design sections" -> "Accepted visual companion\nand visual work?";
+    "Accepted visual companion\nand visual work?" -> "Render localhost\nvisual review" [label="yes"];
+    "Accepted visual companion\nand visual work?" -> "User approves design?" [label="no"];
+    "Render localhost\nvisual review" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
     "User approves design?" -> "Write design doc" [label="yes"];
     "Write design doc" -> "Spec self-review\n(fix inline)";
@@ -98,6 +109,7 @@ digraph brainstorming {
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
 - Be ready to go back and clarify if something doesn't make sense
+- If the user accepted the visual companion and the design is visual, render a localhost visual review before asking for approval. Show concrete layout/style options or the proposed screen structure in the browser companion, then ask the user to confirm or request changes.
 - Approval of an approach is not approval to implement. After the user chooses an approach, present the concrete design and ask for explicit design approval before moving to documentation or planning.
 - Approval of the concrete design is not approval to implement. After design approval, write the spec document first. If the user says "help me" or "do it" at this point, continue with the spec checkpoint rather than implementation.
 
@@ -170,5 +182,5 @@ A browser-based companion for showing mockups, diagrams, and visual options duri
 
 A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
 
-If they agree to the companion, read the detailed guide before proceeding:
+If they agree to the companion, read the detailed guide before proceeding. For visual/frontend work, the companion must be started and used for design review before approval:
 `skills/brainstorming/visual-companion.md`
