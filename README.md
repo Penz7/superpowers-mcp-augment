@@ -112,7 +112,7 @@ superpowers-mcp-augment
 To refresh after new commits are pushed:
 
 ```bash
-codex plugin marketplace upgrade superpowers-mcp-augment
+codex plugin marketplace upgrade superpowers-mcp-augment-dev
 ```
 
 If the GitHub marketplace source is not available yet, use the local development
