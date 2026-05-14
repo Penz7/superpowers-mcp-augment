@@ -1,160 +1,244 @@
 # Superpowers MCP Augment
 
-Superpowers MCP Augment is a Claude/Codex workflow framework built on the Superpowers methodology and augmented with MCP routing for codebase-memory, Serena, and Caveman.
+Superpowers MCP Augment is a fork of the original [Superpowers](https://github.com/obra/superpowers) project. It keeps the Superpowers workflow skeleton for planning, TDD, debugging, review, and delivery, then adds an MCP-aware execution layer for code navigation and implementation.
 
-## Quickstart
+The goal is simple: Superpowers controls the workflow, while specialized tools handle the codebase.
 
-Give your agent Superpowers MCP Augment: [Claude Code](#claude-code), [Codex CLI](#codex-cli), or [Codex App](#codex-app).
+```text
+Superpowers MCP Augment
+  |- brainstorming / planning / TDD / review workflow
+  |- codebase-memory-mcp for architecture and graph intelligence
+  |- Serena MCP for symbol navigation, edits, diagnostics, and memories
+  `- Caveman for compression, commit wording, and review summaries
+```
 
-## How it works
+## Credits
 
-It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
+This fork exists because the original Superpowers project established a strong workflow model for coding agents. Credit and thanks go to Jesse Vincent, Prime Radiant, and the Superpowers contributors for the original methodology, skill structure, and agent behavior design.
 
-Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
+This repository is a focused fork for Claude and Codex users who want MCP-augmented execution. It is not an upstream replacement and does not claim ownership of the original Superpowers work.
 
-After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
+## Supported Agents
 
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
+- Claude Code
+- Codex CLI / Codex App
 
-There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has the augmented workflow.
+Support for other coding harnesses was intentionally removed from this fork to keep the plugin focused and easier to maintain.
 
-## Installation
+## Required MCP Setup
 
-Installation differs by harness. If you use more than one, install Superpowers MCP Augment separately for each one.
+The plugin still works without MCP tools, but the main benefit comes when these tools are installed and available in your agent session.
 
-### Claude Code
+**Recommended MCP stack:**
 
-Install the plugin from your fork or development marketplace as `superpowers-mcp-augment`.
+- `codebase-memory-mcp`: architecture overview, graph search, source snippets, dependency tracing, runtime trace ingestion.
+- `serena-mcp`: project onboarding, symbol search, references, symbol edits, diagnostics, and project memories.
+- `caveman`: compression, commit-message generation, and code-review summarization when available.
 
-#### Official Marketplace
+**Expected tool capabilities:**
 
-- Install from a marketplace entry:
+| Tool | Used for |
+|---|---|
+| `codebase-memory` `list_projects` | Detect indexed projects |
+| `codebase-memory` `detect_changes` | Check graph drift |
+| `codebase-memory` `get_architecture` | Understand architecture before edits |
+| `codebase-memory` `search_graph` | Find functions/classes/routes |
+| `codebase-memory` `trace_path` | Trace calls, data flow, and impact |
+| `codebase-memory` `get_code_snippet` | Read exact symbol source |
+| `serena` `get_current_config` | Verify active project |
+| `serena` `check_onboarding_performed` / `onboarding` | Prepare project context |
+| `serena` `find_symbol` / `find_referencing_symbols` | Navigate code semantically |
+| `serena` `replace_symbol_body` / `insert_*_symbol` | Edit symbols safely |
+| `serena` `get_diagnostics_for_file` | Validate edited files |
+| `serena` `list_memories` / `read_memory` / `write_memory` | Persist useful project context |
+| `caveman` commit/review/compress helpers | Reduce context and standardize summaries |
 
-  ```bash
-  /plugin install superpowers-mcp-augment
-  ```
+If a tool is unavailable, the skills fall back to normal Superpowers behavior instead of failing hard.
 
-#### Development Marketplace
+## Install: Claude Code
 
-For local development, register this checkout as a plugin marketplace.
+### From GitHub Marketplace Source
 
-- Register the marketplace:
+Register this repository as a plugin marketplace:
 
-  ```bash
-  /plugin marketplace add <your-fork-or-local-marketplace>
-  ```
+```bash
+/plugin marketplace add Penz7/superpowers-mcp-augment
+```
 
-- Install the plugin from this marketplace:
+Install the plugin:
 
-  ```bash
-  /plugin install superpowers-mcp-augment@superpowers-mcp-augment-dev
-  ```
+```bash
+/plugin install superpowers-mcp-augment@superpowers-mcp-augment-dev
+```
 
-### Codex CLI
+Restart Claude Code or start a new session after installing.
 
-Install Superpowers MCP Augment from the Codex plugin marketplace or your forked plugin source.
+### Local Development Install
 
-- Open the plugin search interface:
+Clone the repo:
 
-  ```bash
-  /plugins
-  ```
+```bash
+git clone https://github.com/Penz7/superpowers-mcp-augment.git
+cd superpowers-mcp-augment
+```
 
-- Search for Superpowers MCP Augment:
+Register the local checkout according to your Claude Code plugin development workflow, then install `superpowers-mcp-augment`.
 
-  ```bash
-  superpowers-mcp-augment
-  ```
+## Install: Codex
 
-- Select `Install Plugin`.
+This repository includes a Codex plugin manifest at:
 
-### Codex App
+```text
+.codex-plugin/plugin.json
+```
 
-Install Superpowers MCP Augment from the Codex plugin marketplace or your forked plugin source.
+Once published to the Codex plugin marketplace, install it from the Codex plugin UI by searching:
 
-- In the Codex app, click on Plugins in the sidebar.
-- You should see `Superpowers MCP Augment` in the Coding section.
-- Click the `+` next to Superpowers MCP Augment and follow the prompts.
+```text
+superpowers-mcp-augment
+```
 
-## The Basic Workflow
+For development or marketplace sync, use:
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
+```bash
+./scripts/sync-to-codex-plugin.sh --bootstrap
+```
 
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+The sync script packages this plugin into:
 
-3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps.
+```text
+plugins/superpowers-mcp-augment
+```
 
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
+## Verify Installation
 
-5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
+Start a clean Claude or Codex session inside a code repository and ask:
 
-6. **requesting-code-review** - Activates between tasks. Reviews against plan, reports issues by severity. Critical issues block progress.
+```text
+Let's make a react todo list
+```
 
-7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
+Expected behavior:
 
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions. When codebase-memory, Serena, or Caveman are available, the augmented skills route code discovery, editing, diagnostics, summaries, and review through those tools.
+- The agent loads `using-superpowers`.
+- The agent uses `brainstorming` before writing code.
+- If MCP tools are available, the agent also initializes MCP session context and routes code discovery through `mcp-routing`.
 
-## What's Inside
+You can also ask directly:
 
-### Skills Library
+```text
+Use superpowers-mcp-augment:mcp-session-sync for this repo.
+```
 
-**Testing**
-- **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
+## How It Works
 
-**Debugging**
-- **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
-- **mcp-trace** - Trace call chains, data flow, and impact zones with MCP tools
+The workflow follows the original Superpowers shape:
 
-**Collaboration** 
-- **brainstorming** - Socratic design refinement
-- **writing-plans** - Detailed implementation plans
-- **executing-plans** - Batch execution with checkpoints
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
-- **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
-- **finishing-a-development-branch** - Merge/PR decision workflow
-- **subagent-driven-development** - Fast iteration with two-stage review (spec compliance, then code quality)
-- **mcp-session-sync** - Initialize graph, Serena state, onboarding, and memories at session start
-- **mcp-routing** - Route code navigation, edits, diagnostics, summaries, and review to the best available tool
-- **caveman-commit** - Delegate commit and review wording to Caveman when available
+1. `brainstorming`: clarify requirements before implementation.
+2. `writing-plans`: write an explicit implementation plan.
+3. `using-git-worktrees`: isolate work when appropriate.
+4. `subagent-driven-development` or `executing-plans`: execute tasks.
+5. `test-driven-development`: enforce red-green-refactor.
+6. `requesting-code-review`: review early and often.
+7. `verification-before-completion`: verify before claiming success.
+8. `finishing-a-development-branch`: decide how to merge, PR, keep, or discard work.
 
-**Meta**
-- **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
+The fork adds these MCP-oriented skills:
 
-## Philosophy
+- `mcp-session-sync`: initialize codebase-memory, Serena, onboarding, and relevant memories.
+- `mcp-routing`: route architecture, navigation, editing, diagnostics, review, and commit wording to the best available tool.
+- `mcp-trace`: map call chains, data flow, and impact zones before changing code.
+- `caveman-commit`: delegate commit and review wording to Caveman when available.
 
-- **Test-Driven Development** - Write tests first, always
-- **Systematic over ad-hoc** - Process over guessing
-- **Complexity reduction** - Simplicity as primary goal
-- **Evidence over claims** - Verify before declaring success
+## Usage Pattern
 
-This fork builds on the original Superpowers workflow philosophy and narrows support to Claude and Codex.
+For a normal feature request:
 
-## Contributing
+```text
+I want to add user profile editing. Use Superpowers MCP Augment and the MCP tools if available.
+```
 
-The general contribution process for Superpowers MCP Augment is below. Keep in mind that updates to skills should be tested across Claude and Codex.
+For codebase sync at session start:
 
-1. Fork the repository
-2. Switch to the 'dev' branch
-3. Create a branch for your work
-4. Follow the `writing-skills` skill for creating and testing new and modified skills
-5. Submit a PR, being sure to fill in the pull request template.
+```text
+Use superpowers-mcp-augment:mcp-session-sync, then summarize the active project state.
+```
 
-See `skills/writing-skills/SKILL.md` for the complete guide.
+For a bug:
 
-## Updating
+```text
+Use systematic debugging and mcp-trace to find the root cause before changing code.
+```
 
-Updates depend on whether you installed the Claude or Codex plugin, but are often automatic.
+For a plan:
+
+```text
+Execute docs/superpowers/plans/my-feature.md using superpowers-mcp-augment:subagent-driven-development.
+```
+
+## Skills Library
+
+**Workflow**
+
+- `using-superpowers`
+- `brainstorming`
+- `writing-plans`
+- `executing-plans`
+- `subagent-driven-development`
+- `dispatching-parallel-agents`
+- `using-git-worktrees`
+- `finishing-a-development-branch`
+
+**Engineering discipline**
+
+- `test-driven-development`
+- `systematic-debugging`
+- `requesting-code-review`
+- `receiving-code-review`
+- `verification-before-completion`
+
+**MCP augmentation**
+
+- `mcp-session-sync`
+- `mcp-routing`
+- `mcp-trace`
+- `caveman-commit`
+
+**Skill authoring**
+
+- `writing-skills`
+
+## Development
+
+Run lightweight validation:
+
+```bash
+python3 -m json.tool .claude-plugin/plugin.json >/dev/null
+python3 -m json.tool .codex-plugin/plugin.json >/dev/null
+bash -n hooks/session-start scripts/sync-to-codex-plugin.sh
+bash tests/codex-plugin-sync/test-sync-to-codex-plugin.sh
+```
+
+Validate all skill frontmatter:
+
+```bash
+python3 - <<'PY2'
+from pathlib import Path
+for p in sorted(Path('skills').glob('*/SKILL.md')):
+    text = p.read_text()
+    if not text.startswith('---\n') or '\n---\n' not in text[4:]:
+        raise SystemExit(f'bad frontmatter: {p}')
+    head = text.split('\n---\n', 1)[0]
+    if 'name:' not in head or 'description:' not in head:
+        raise SystemExit(f'missing required frontmatter: {p}')
+print('all skill frontmatter ok')
+PY2
+```
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License. This fork retains the original license and attribution.
 
-## Community
+## Acknowledgements
 
-Superpowers MCP Augment is a fork of Superpowers, adapted for Claude/Codex MCP-augmented workflows.
-
-- **Issues**: https://github.com/penz/superpowers-mcp-augment/issues
+Thank you to the original Superpowers maintainers and contributors for the workflow foundation this fork builds on.
