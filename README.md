@@ -92,6 +92,12 @@ This repository includes a Codex plugin manifest at:
 .codex-plugin/plugin.json
 ```
 
+For Codex marketplace discovery, the same runtime files are exposed through:
+
+```text
+plugins/superpowers-mcp-augment
+```
+
 ### From This GitHub Repository
 
 This plugin is not published to the public Codex plugin marketplace yet. Codex

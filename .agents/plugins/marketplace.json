@@ -8,7 +8,7 @@
       "name": "superpowers-mcp-augment",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./plugins/superpowers-mcp-augment"
       },
       "policy": {
         "installation": "INSTALLED_BY_DEFAULT",
