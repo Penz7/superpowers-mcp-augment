@@ -13,6 +13,10 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
+<DESIGN-APPROVAL-IS-NOT-IMPLEMENTATION-APPROVAL>
+When the user says the design is correct, agrees with the recommended approach, or says phrases like "do it", "help me", "looks good", "approved", or "yes" after a design presentation, treat that as approval to move to the next brainstorming checkpoint only. Your next action MUST be writing the spec document, not creating implementation files. Do not write files such as `index.html`, source files, app scaffolds, stylesheets, tests, or package manifests until the spec has been written, reviewed, and the writing-plans skill has produced an implementation plan.
+</DESIGN-APPROVAL-IS-NOT-IMPLEMENTATION-APPROVAL>
+
 <NO-DUPLICATE-PROMPTS>
 Send each visual companion offer, clarifying question, approach choice, and approval request exactly once per turn. Do not repeat the same text after a separator, status update, or tool result. If you suspect the interface echoed your previous message, continue from the user's newest response instead of restating the prompt.
 </NO-DUPLICATE-PROMPTS>
@@ -30,7 +34,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit if the workspace is a git repository
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -95,6 +99,7 @@ digraph brainstorming {
 - Cover: architecture, components, data flow, error handling, testing
 - Be ready to go back and clarify if something doesn't make sense
 - Approval of an approach is not approval to implement. After the user chooses an approach, present the concrete design and ask for explicit design approval before moving to documentation or planning.
+- Approval of the concrete design is not approval to implement. After design approval, write the spec document first. If the user says "help me" or "do it" at this point, continue with the spec checkpoint rather than implementation.
 
 **Design for isolation and clarity:**
 
@@ -116,7 +121,7 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
+- Commit the design document to git when inside a git repository. If the workspace is not a git repository, say commit was skipped and continue to the user review gate.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
