@@ -68,7 +68,7 @@ Register this repository as a plugin marketplace:
 Install the plugin:
 
 ```bash
-/plugin install superpowers-mcp-augment@superpowers-mcp-augment-dev
+/plugin install superpowers-mcp-augment@superpowers-mcp-augment
 ```
 
 Restart Claude Code or start a new session after installing.
@@ -112,7 +112,7 @@ superpowers-mcp-augment
 To refresh after new commits are pushed:
 
 ```bash
-codex plugin marketplace upgrade superpowers-mcp-augment-dev
+codex plugin marketplace upgrade superpowers-mcp-augment
 ```
 
 If the GitHub marketplace source is not available yet, use the local development

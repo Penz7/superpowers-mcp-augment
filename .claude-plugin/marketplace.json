@@ -1,6 +1,6 @@
 {
-  "name": "superpowers-mcp-augment-dev",
-  "description": "Development marketplace for Superpowers MCP Augment",
+  "name": "superpowers-mcp-augment",
+  "description": "Marketplace for Superpowers MCP Augment",
   "owner": {
     "name": "Jesse Vincent",
     "email": "jesse@fsck.com"

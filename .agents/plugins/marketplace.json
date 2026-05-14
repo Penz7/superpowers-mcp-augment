@@ -1,7 +1,7 @@
 {
-  "name": "superpowers-mcp-augment-dev",
+  "name": "superpowers-mcp-augment",
   "interface": {
-    "displayName": "Superpowers MCP Augment Dev"
+    "displayName": "Superpowers MCP Augment"
   },
   "plugins": [
     {
