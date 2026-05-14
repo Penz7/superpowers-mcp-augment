@@ -92,13 +92,79 @@ This repository includes a Codex plugin manifest at:
 .codex-plugin/plugin.json
 ```
 
-Once published to the Codex plugin marketplace, install it from the Codex plugin UI by searching:
+### From This GitHub Repository
+
+This plugin is not published to the public Codex plugin marketplace yet. Codex
+CLI installs plugins by registering a marketplace source. If this repository is
+published with Codex marketplace metadata, register it directly:
+
+```bash
+codex plugin marketplace add Penz7/superpowers-mcp-augment
+```
+
+Restart Codex CLI or start a new session after adding the marketplace. The plugin
+should then appear as:
 
 ```text
 superpowers-mcp-augment
 ```
 
-For development or marketplace sync, use:
+To refresh after new commits are pushed:
+
+```bash
+codex plugin marketplace upgrade superpowers-mcp-augment
+```
+
+If the GitHub marketplace source is not available yet, use the local development
+install below.
+
+### Local Development Install
+
+For local testing without relying on GitHub, copy this checkout into a local
+Codex marketplace layout:
+
+```bash
+mkdir -p ~/plugins
+cp -R . ~/plugins/superpowers-mcp-augment
+mkdir -p ~/.agents/plugins
+```
+
+Create or update `~/.agents/plugins/marketplace.json`:
+
+```json
+{
+  "name": "local-marketplace",
+  "interface": {
+    "displayName": "Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "superpowers-mcp-augment",
+      "source": {
+        "source": "local",
+        "path": "./plugins/superpowers-mcp-augment"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    }
+  ]
+}
+```
+
+Then register the local marketplace root:
+
+```bash
+codex plugin marketplace add ~
+```
+
+Restart Codex CLI or start a new session.
+
+### Publishing Sync
+
+For syncing this fork into the Codex plugin marketplace repository, use:
 
 ```bash
 ./scripts/sync-to-codex-plugin.sh --bootstrap
