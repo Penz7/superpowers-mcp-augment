@@ -15,6 +15,10 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** If working in an isolated worktree, it should have been created via the `superpowers-mcp-augment:using-git-worktrees` skill at execution time.
 
+<PLAN-HANDOFF-GATE>
+After saving the implementation plan, STOP. Do not create, edit, or delete implementation files in the same turn. Do not start executing checklist tasks just because the user approved the design, said "help me", "do it", "continue", or otherwise expressed readiness. Your next message MUST be the execution handoff with the two choices below, and you MUST wait for the user's choice before invoking `subagent-driven-development` or `executing-plans`.
+</PLAN-HANDOFF-GATE>
+
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 
