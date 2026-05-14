@@ -1,0 +1,23 @@
+{
+  "name": "superpowers-mcp-augment",
+  "description": "Claude and Codex workflow skills augmented with MCP routing for codebase-memory, Serena, and Caveman",
+  "version": "5.1.0",
+  "author": {
+    "name": "Jesse Vincent",
+    "email": "jesse@fsck.com"
+  },
+  "homepage": "https://github.com/penz/superpowers-mcp-augment",
+  "repository": "https://github.com/penz/superpowers-mcp-augment",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "tdd",
+    "debugging",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "mcp",
+    "serena",
+    "codebase-memory"
+  ]
+}

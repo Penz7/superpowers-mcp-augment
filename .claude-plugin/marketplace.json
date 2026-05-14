@@ -1,0 +1,20 @@
+{
+  "name": "superpowers-mcp-augment-dev",
+  "description": "Development marketplace for Superpowers MCP Augment",
+  "owner": {
+    "name": "Jesse Vincent",
+    "email": "jesse@fsck.com"
+  },
+  "plugins": [
+    {
+      "name": "superpowers-mcp-augment",
+      "description": "Claude and Codex workflow skills augmented with MCP routing for codebase-memory, Serena, and Caveman",
+      "version": "5.1.0",
+      "source": "./",
+      "author": {
+        "name": "Jesse Vincent",
+        "email": "jesse@fsck.com"
+      }
+    }
+  ]
+}
