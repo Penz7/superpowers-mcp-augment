@@ -151,7 +151,7 @@ Create or update `~/.agents/plugins/marketplace.json`:
         "path": "./plugins/superpowers-mcp-augment"
       },
       "policy": {
-        "installation": "INSTALLED_BY_DEFAULT",
+        "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Coding"
