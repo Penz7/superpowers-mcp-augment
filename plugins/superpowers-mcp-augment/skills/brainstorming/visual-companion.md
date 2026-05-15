@@ -32,10 +32,10 @@ The server watches a directory for HTML files and serves the newest one to the b
 
 ## Starting a Session
 
-**Resolve script path first:** `scripts/start-server.sh` is relative to this `brainstorming` skill directory, not the user's project root. In Codex, use the installed skill path shown in the skill list, for example:
+**Resolve script path first:** `scripts/start-server.sh` is relative to this `brainstorming` skill directory, not the user's project root. In Codex, use the installed brainstorming skill path shown in the active skill list or plugin runtime for the current session. Do not copy paths from another machine, user account, or plugin version.
 
 ```bash
-/Users/penz/.codex/plugins/cache/superpowers-mcp-augment/superpowers-mcp-augment/5.1.0/skills/brainstorming/scripts/start-server.sh --project-dir /path/to/project
+<installed-brainstorming-skill-dir>/scripts/start-server.sh --project-dir /path/to/project
 ```
 
 ```bash

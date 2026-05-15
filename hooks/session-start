@@ -7,11 +7,23 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Check if legacy skills directory exists and build warning
+# Check if legacy skills directories exist and build warning
 warning_message=""
-legacy_skills_dir="${HOME}/.config/superpowers-mcp-augment/skills"
-if [ -d "$legacy_skills_dir" ]; then
-    warning_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **WARNING:** Superpowers MCP Augment now uses Claude Code's skills system. Custom skills in ~/.config/superpowers-mcp-augment/skills will not be read. Move custom skills to ~/.claude/skills instead. To make this message go away, remove ~/.config/superpowers-mcp-augment/skills</important-reminder>"
+legacy_skills_dirs=(
+    "${HOME}/.config/superpowers/skills"
+    "${HOME}/.config/superpowers-mcp-augment/skills"
+)
+found_legacy_skills_dirs=()
+
+for legacy_skills_dir in "${legacy_skills_dirs[@]}"; do
+    if [ -d "$legacy_skills_dir" ]; then
+        found_legacy_skills_dirs+=("$legacy_skills_dir")
+    fi
+done
+
+if [ ${#found_legacy_skills_dirs[@]} -gt 0 ]; then
+    legacy_skills_list="$(printf '%s ' "${found_legacy_skills_dirs[@]}")"
+    warning_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **WARNING:** Superpowers MCP Augment now uses Claude Code's skills system. Custom skills in ${legacy_skills_list% } will not be read. Move custom skills to ~/.claude/skills instead. To make this message go away, remove the legacy skill directories listed above.</important-reminder>"
 fi
 
 # Read using-superpowers content
