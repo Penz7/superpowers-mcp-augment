@@ -13,6 +13,27 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
+<CODEX-SUBAGENT-GATE>
+In Codex, only spawn subagents when the user has explicitly chosen Subagent-Driven execution or otherwise explicitly asked for subagents/parallel agent work. The writing-plans handoff provides that choice. If the user has not chosen it, use `executing-plans` instead of silently spawning agents.
+</CODEX-SUBAGENT-GATE>
+
+<REVIEW-COVERAGE-GATE>
+Review coverage follows implementation coverage. A review of scaffolding, setup, or an early slice does not approve later feature work.
+
+For EVERY task that changes implementation behavior or UI, complete this sequence before moving on:
+1. Implementer subagent reports DONE or DONE_WITH_CONCERNS.
+2. Spec compliance reviewer independently checks actual files against that task.
+3. Implementer fixes every spec issue and spec reviewer re-reviews.
+4. Code quality reviewer reviews only after spec compliance passes.
+5. Implementer fixes Critical/Important quality issues and reviewer re-reviews.
+
+After the final task, dispatch a final reviewer for the whole implementation. The final reviewer must compare the complete diff against the full plan/spec, not just the last task.
+</REVIEW-COVERAGE-GATE>
+
+<FRONTEND-VISUAL-GATE>
+For frontend/UI work, build/test output is not enough to claim the interface is complete. Before completion, gather browser or screenshot evidence when a browser tool is available. If browser access is unavailable or blocked, state that visual QA was not completed and do not claim visual correctness.
+</FRONTEND-VISUAL-GATE>
+
 ## When to Use
 
 ```dot
@@ -63,6 +84,10 @@ digraph process {
     "Read plan, extract all tasks with full text, note context, apply MCP routing if available, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
+    "Final reviewer approves full plan/spec coverage?" [shape=diamond];
+    "Implementer fixes final review issues" [shape=box];
+    "Frontend/UI work?" [shape=diamond];
+    "Run browser/screenshot smoke test or record visual QA unavailable" [shape=box];
     "Use superpowers-mcp-augment:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks with full text, note context, apply MCP routing if available, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
@@ -82,7 +107,13 @@ digraph process {
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use superpowers-mcp-augment:finishing-a-development-branch";
+    "Dispatch final code reviewer subagent for entire implementation" -> "Final reviewer approves full plan/spec coverage?";
+    "Final reviewer approves full plan/spec coverage?" -> "Implementer fixes final review issues" [label="no"];
+    "Implementer fixes final review issues" -> "Dispatch final code reviewer subagent for entire implementation";
+    "Final reviewer approves full plan/spec coverage?" -> "Frontend/UI work?" [label="yes"];
+    "Frontend/UI work?" -> "Run browser/screenshot smoke test or record visual QA unavailable" [label="yes"];
+    "Frontend/UI work?" -> "Use superpowers-mcp-augment:finishing-a-development-branch" [label="no"];
+    "Run browser/screenshot smoke test or record visual QA unavailable" -> "Use superpowers-mcp-augment:finishing-a-development-branch";
 }
 ```
 
@@ -126,6 +157,14 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 - `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
 
 When codebase-memory-mcp, Serena, or Caveman tools are available, include the routing instruction from superpowers-mcp-augment:mcp-routing in implementer and reviewer prompts.
+
+For the final whole-implementation review, use the code quality reviewer template with:
+- DESCRIPTION: Full implementation summary, not one task summary
+- PLAN_OR_REQUIREMENTS: Complete spec and complete plan paths/content
+- BASE_SHA: SHA or diff base before implementation began
+- HEAD_SHA: current SHA or working-tree diff
+
+If there is no git repository, provide the reviewer with an explicit file-change inventory and the relevant full file contents/diffs instead of SHAs.
 
 ## Example Workflow
 
@@ -198,7 +237,8 @@ Code reviewer: ✅ Approved
 
 [After all tasks]
 [Dispatch final code-reviewer]
-Final reviewer: All requirements met, ready to merge
+Final reviewer: ✅ Full implementation matches the spec/plan. No blocking quality issues.
+[Frontend work: run browser smoke test/screenshot review, or record visual QA unavailable]
 
 Done!
 ```
@@ -241,6 +281,8 @@ Done!
 **Never:**
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
+- Treat a scaffold/setup review as approval for later feature implementation
+- Skip the final whole-implementation reviewer
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
@@ -251,6 +293,7 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
+- Claim frontend/UI completion from `npm run build` alone
 
 **If subagent asks questions:**
 - Answer clearly and completely

@@ -44,6 +44,7 @@ Skip any step = lying, not verifying
 | Tests pass | Test command output: 0 failures | Previous run, "should pass" |
 | Linter clean | Linter output: 0 errors | Partial check, extrapolation |
 | Build succeeds | Build command: exit 0 | Linter passing, logs look good |
+| Frontend visually correct | Browser/screenshot/manual visual QA evidence | `npm run build` alone |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
@@ -97,6 +98,12 @@ Skip any step = lying, not verifying
 ```
 ✅ Re-read plan → Create checklist → Verify each → Report gaps or completion
 ❌ "Tests pass, phase complete"
+```
+
+**Frontend/UI:**
+```
+✅ Build passes + browser smoke/screenshot checked, or explicitly state visual QA unavailable
+❌ "Landing page is complete" from build output alone
 ```
 
 **Agent delegation:**

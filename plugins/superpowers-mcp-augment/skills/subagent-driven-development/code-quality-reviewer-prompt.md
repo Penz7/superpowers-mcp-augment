@@ -6,6 +6,11 @@ Use this template when dispatching a code quality reviewer subagent.
 
 **Only dispatch after spec compliance review passes.**
 
+Use this template for both per-task quality reviews and the final whole-implementation review.
+For the final review, evaluate the complete diff against the full spec and plan, including
+integration between tasks, responsive/UI behavior where applicable, and whether earlier
+scaffold reviews failed to cover later feature work.
+
 ```
 Task tool (general-purpose):
   Use template at requesting-code-review/code-reviewer.md
@@ -23,5 +28,6 @@ Task tool (general-purpose):
 - Did this implementation create new files that are already large, or significantly grow existing files? (Don't flag pre-existing file sizes — focus on what this change contributed.)
 - If MCP tools are available, did implementation use structured graph/symbol/diagnostic tools instead of broad manual code navigation?
 - If Caveman compression or review helpers were used, did they preserve blocking findings and verification evidence?
+- For frontend/UI work, is there browser, screenshot, or explicit visual QA evidence? If not, flag that visual correctness is unverified even if the build passes.
 
 **Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment

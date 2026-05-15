@@ -14,6 +14,12 @@ Task tool (general-purpose):
 
     [FULL TEXT of task requirements]
 
+    ## Scope of This Review
+
+    This review covers the task above only. If this task is scaffolding or setup,
+    do not imply approval of later feature work. Later implementation tasks still
+    require their own spec compliance review.
+
     ## What Implementer Claims They Built
 
     [From implementer's report]
@@ -58,4 +64,5 @@ Task tool (general-purpose):
     Report:
     - ✅ Spec compliant (if everything matches after code inspection)
     - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
+    - Review scope: [task name only; explicitly say this does not approve later tasks]
 ```

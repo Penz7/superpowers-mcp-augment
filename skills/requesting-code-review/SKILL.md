@@ -15,6 +15,7 @@ Dispatch a code reviewer subagent to catch issues before they cascade. The revie
 - After each task in subagent-driven development
 - After completing major feature
 - Before merge to main
+- After frontend/UI implementation, with browser/screenshot evidence when available
 
 **Optional but valuable:**
 - When stuck (fresh perspective)
@@ -83,10 +84,16 @@ You: [Fix progress indicators]
 - Review after EACH task
 - Catch issues before they compound
 - Fix before moving to next task
+- Run one final whole-implementation review after all tasks. A scaffold/setup review does not approve later feature work.
 
 **Executing Plans:**
 - Review after each task or at natural checkpoints
 - Get feedback, apply, continue
+
+**Frontend/UI Work:**
+- Build/lint/test output verifies compilation and code behavior only.
+- Browser smoke tests, screenshots, or visual companion evidence are required before claiming visual correctness when browser access is available.
+- If browser access is blocked, state that visual QA is unavailable and keep the claim limited to verified build/test results.
 
 **Ad-Hoc Development:**
 - Review before merge
