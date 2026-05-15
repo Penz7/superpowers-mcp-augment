@@ -105,6 +105,9 @@ Task tool (general-purpose):
 
     ## Report Format
 
+    You MUST report a formal status before the controller can review or move on.
+    Do not rely on files appearing on disk as your completion signal.
+
     When done, report:
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - What you implemented (or what you attempted, if blocked)

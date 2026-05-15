@@ -19,7 +19,23 @@ When the user says the design is correct, agrees with the recommended approach, 
 
 <NO-DUPLICATE-PROMPTS>
 Send each visual companion offer, clarifying question, approach choice, and approval request exactly once per turn. Do not repeat the same text after a separator, status update, or tool result. If you suspect the interface echoed your previous message, continue from the user's newest response instead of restating the prompt.
+
+After writing the spec, send exactly one spec review request. Do not send a second message or status update that repeats the same path and asks for the same review. The spec review request is a gate: once sent, stop and wait for the user's response.
 </NO-DUPLICATE-PROMPTS>
+
+<VISUAL-COMPANION-OFFER-GATE>
+When offering the visual companion, STOP after sending the offer. The offer must be the only user-facing content in that assistant message. Do not ask a style, scope, requirements, or implementation question in the same turn. Wait for the user's answer, then continue.
+</VISUAL-COMPANION-OFFER-GATE>
+
+<CHOICE-AND-APPROVAL-GATE>
+When you ask the user to choose from explicit options, review a localhost visual, approve a design, or review a written spec, a generic reply like "continue", "tiếp tục", "ok", "go on", or "help me" is NOT enough unless your immediately previous message explicitly named a default and said that generic continuation would accept it.
+
+If the user gives a generic continuation at a required choice or approval gate, ask one short confirmation question instead of choosing for them or moving to the next workflow phase.
+</CHOICE-AND-APPROVAL-GATE>
+
+<PLANNING-SKILL-GATE>
+Do NOT invoke, read, or load `writing-plans`, `executing-plans`, or `subagent-driven-development` until the written spec exists, has passed self-review, and the user has reviewed/approved the spec file. In Codex, reading a skill file counts as invoking/loading it for workflow purposes.
+</PLANNING-SKILL-GATE>
 
 <VISUAL-DESIGN-REVIEW-GATE>
 If the user accepted the visual companion and the work involves frontend UI, web pages, product screens, dashboards, layout, visual style, or other visual design, you MUST use the browser companion before asking for design approval. Start the companion server, render at least one visual review screen on localhost, give the URL, and ask the user to review it there. A text-only design summary is not enough for visual work after the user has accepted the URL companion.
@@ -52,31 +68,40 @@ digraph brainstorming {
     "Explore project context" [shape=box];
     "Visual questions ahead?" [shape=diamond];
     "Offer Visual Companion\n(own message, no other content)" [shape=box];
+    "Wait for companion answer" [shape=doublecircle];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
     "Accepted visual companion\nand visual work?" [shape=diamond];
     "Render localhost\nvisual review" [shape=box];
+    "Generic continue at\nchoice/approval gate?" [shape=diamond];
+    "Ask short confirmation\ninstead of proceeding" [shape=box];
     "User approves design?" [shape=diamond];
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
+    "Send one spec review request\nthen stop" [shape=doublecircle];
     "User reviews spec?" [shape=diamond];
     "Invoke writing-plans skill" [shape=doublecircle];
 
     "Explore project context" -> "Visual questions ahead?";
     "Visual questions ahead?" -> "Offer Visual Companion\n(own message, no other content)" [label="yes"];
     "Visual questions ahead?" -> "Ask clarifying questions" [label="no"];
-    "Offer Visual Companion\n(own message, no other content)" -> "Ask clarifying questions";
+    "Offer Visual Companion\n(own message, no other content)" -> "Wait for companion answer";
+    "Wait for companion answer" -> "Ask clarifying questions" [label="next user turn"];
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "Accepted visual companion\nand visual work?";
     "Accepted visual companion\nand visual work?" -> "Render localhost\nvisual review" [label="yes"];
     "Accepted visual companion\nand visual work?" -> "User approves design?" [label="no"];
-    "Render localhost\nvisual review" -> "User approves design?";
+    "Render localhost\nvisual review" -> "Generic continue at\nchoice/approval gate?";
+    "Generic continue at\nchoice/approval gate?" -> "Ask short confirmation\ninstead of proceeding" [label="yes"];
+    "Ask short confirmation\ninstead of proceeding" -> "User approves design?";
+    "Generic continue at\nchoice/approval gate?" -> "User approves design?" [label="no"];
     "User approves design?" -> "Present design sections" [label="no, revise"];
     "User approves design?" -> "Write design doc" [label="yes"];
     "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
+    "Spec self-review\n(fix inline)" -> "Send one spec review request\nthen stop";
+    "Send one spec review request\nthen stop" -> "User reviews spec?" [label="next user turn"];
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
     "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
 }
@@ -112,6 +137,7 @@ digraph brainstorming {
 - If the user accepted the visual companion and the design is visual, render a localhost visual review before asking for approval. Show concrete layout/style options or the proposed screen structure in the browser companion, then ask the user to confirm or request changes.
 - Approval of an approach is not approval to implement. After the user chooses an approach, present the concrete design and ask for explicit design approval before moving to documentation or planning.
 - Approval of the concrete design is not approval to implement. After design approval, write the spec document first. If the user says "help me" or "do it" at this point, continue with the spec checkpoint rather than implementation.
+- A generic continuation after options is not a choice. If you asked "choose A/B/C" and the user says "continue", ask whether to use your recommended option instead of silently choosing it.
 
 **Design for isolation and clarity:**
 
@@ -155,6 +181,7 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 - Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
+- Do not load `writing-plans` early "just to prepare." Load it only after the written spec review gate passes.
 
 ## Key Principles
 
@@ -173,6 +200,8 @@ A browser-based companion for showing mockups, diagrams, and visual options duri
 > "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
 
 **This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
+
+If you accidentally sent the offer and a question in the same assistant turn, treat that as a workflow violation. On the next turn, recover by asking only for the companion choice first, then continue from the user's answer.
 
 **Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
 

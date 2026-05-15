@@ -30,6 +30,28 @@ For EVERY task that changes implementation behavior or UI, complete this sequenc
 After the final task, dispatch a final reviewer for the whole implementation. The final reviewer must compare the complete diff against the full plan/spec, not just the last task.
 </REVIEW-COVERAGE-GATE>
 
+<IMPLEMENTER-COMPLETION-GATE>
+Do not inspect files, run reviews, or infer task completion just because files appeared on disk. Wait for the task implementer subagent to report one of the formal statuses: DONE, DONE_WITH_CONCERNS, BLOCKED, or NEEDS_CONTEXT.
+
+If the implementer has not reported a status, keep waiting or send that same implementer more context. Do not dispatch spec review, do not dispatch quality review, and do not start the next task.
+</IMPLEMENTER-COMPLETION-GATE>
+
+<CONTROLLER-NO-INLINE-EDITS-GATE>
+In Subagent-Driven execution, the controller coordinates. It does not implement or fix task code inline.
+
+When reviewer feedback requires code changes, dispatch the original implementer if still available, or a dedicated fix subagent with the exact reviewer findings and task scope. After the fix, run the same review stage again. Do not edit files yourself to "unblock" the flow.
+</CONTROLLER-NO-INLINE-EDITS-GATE>
+
+<NO-SILENT-INLINE-FALLBACK>
+Do not switch a task from Subagent-Driven to inline execution because it looks simple, is "mostly content", takes too long, or an agent limit is reached. If an agent spawn fails, close completed agents or wait, then retry the required subagent at the same gate. If subagents are unavailable and no recovery is possible, stop and report the blocker to the user.
+</NO-SILENT-INLINE-FALLBACK>
+
+<PENDING-REVIEW-GATE>
+Never move to Task N+1 while Task N has a pending implementer, pending spec review, pending quality review, failed reviewer spawn, unresolved DONE_WITH_CONCERNS, or unapplied/re-unreviewed fixes.
+
+DONE_WITH_CONCERNS is not approval. Treat it as a gate that requires either a fix plus re-review, or an explicit documented decision that the concern is non-blocking and still within the task/plan. If the concern is about spec drift, it is blocking until spec review passes.
+</PENDING-REVIEW-GATE>
+
 <FRONTEND-VISUAL-GATE>
 For frontend/UI work, build/test output is not enough to claim the interface is complete. Before completion, gather browser or screenshot evidence when a browser tool is available. If browser access is unavailable or blocked, state that visual QA was not completed and do not claim visual correctness.
 </FRONTEND-VISUAL-GATE>
@@ -72,12 +94,14 @@ digraph process {
         "Implementer subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
+        "Implementer reports formal status?" [shape=diamond];
+        "Wait or provide context\nto same implementer" [shape=box];
         "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
         "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
-        "Implementer subagent fixes spec gaps" [shape=box];
+        "Dispatch implementer/fix subagent\nfor spec gaps" [shape=box];
         "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
         "Code quality reviewer subagent approves?" [shape=diamond];
-        "Implementer subagent fixes quality issues" [shape=box];
+        "Dispatch implementer/fix subagent\nfor quality issues" [shape=box];
         "Mark task complete in TodoWrite" [shape=box];
     }
 
@@ -95,14 +119,17 @@ digraph process {
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
+    "Implementer subagent implements, tests, commits, self-reviews" -> "Implementer reports formal status?";
+    "Implementer reports formal status?" -> "Wait or provide context\nto same implementer" [label="no"];
+    "Wait or provide context\nto same implementer" -> "Implementer reports formal status?";
+    "Implementer reports formal status?" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="DONE/DONE_WITH_CONCERNS"];
     "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
-    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
-    "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
+    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch implementer/fix subagent\nfor spec gaps" [label="no"];
+    "Dispatch implementer/fix subagent\nfor spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
     "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
     "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
-    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
+    "Code quality reviewer subagent approves?" -> "Dispatch implementer/fix subagent\nfor quality issues" [label="no"];
+    "Dispatch implementer/fix subagent\nfor quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
     "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
@@ -149,6 +176,29 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 4. If the plan itself is wrong, escalate to the human
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+
+**No status yet:** Do not infer completion from filesystem changes. Continue waiting, or ask the implementer for a formal status update. Reviews only start after a formal status.
+
+## Controller Discipline
+
+The controller owns orchestration, not implementation.
+
+**Allowed controller actions:**
+- Read the plan once and extract exact task text
+- Dispatch implementer/reviewer/fix subagents
+- Wait for formal subagent statuses
+- Summarize reviewer findings into the next subagent prompt
+- Close completed agents to free capacity
+- Run final verification/browser QA after all task gates pass
+
+**Forbidden controller actions during task gates:**
+- Editing task files directly
+- Starting review before implementer status
+- Moving to the next task with pending or failed review gates
+- Reclassifying a Subagent-Driven task as inline because it is simple
+- Treating `DONE_WITH_CONCERNS` as approval without resolving/documenting the concern
+
+If a spawn fails because too many agents are open, close completed agents and retry the same required subagent. Do not skip that review/fix stage.
 
 ## Prompt Templates
 
@@ -281,9 +331,13 @@ Done!
 **Never:**
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
+- Start reviews before the implementer reports DONE or DONE_WITH_CONCERNS
 - Treat a scaffold/setup review as approval for later feature implementation
 - Skip the final whole-implementation reviewer
 - Proceed with unfixed issues
+- Edit task files directly as controller during Subagent-Driven execution
+- Switch to inline execution mid-task because the task looks simple or an agent is slow
+- Ignore an agent spawn failure and continue past that gate
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
 - Skip scene-setting context (subagent needs to understand where task fits)
@@ -301,7 +355,7 @@ Done!
 - Don't rush them into implementation
 
 **If reviewer finds issues:**
-- Implementer (same subagent) fixes them
+- Implementer or a dedicated fix subagent fixes them
 - Reviewer reviews again
 - Repeat until approved
 - Don't skip the re-review

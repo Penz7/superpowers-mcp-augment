@@ -17,6 +17,8 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 <PLAN-HANDOFF-GATE>
 After saving the implementation plan, STOP. Do not create, edit, or delete implementation files in the same turn. Do not start executing checklist tasks just because the user approved the design, said "help me", "do it", "continue", or otherwise expressed readiness. Your next message MUST be the execution handoff with the two choices below, and you MUST wait for the user's choice before invoking `subagent-driven-development` or `executing-plans`.
+
+Send the execution handoff exactly once. Do not send a second status update or restated option list that repeats the plan path and the same two choices. Once the handoff is sent, stop and wait.
 </PLAN-HANDOFF-GATE>
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
@@ -146,6 +148,8 @@ After saving the plan, offer execution choice:
 **2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
 
 **Which approach?"**
+
+This handoff is a gate. Send it once, then stop. If you already sent an equivalent handoff in the current turn, do not send another.
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers-mcp-augment:subagent-driven-development
